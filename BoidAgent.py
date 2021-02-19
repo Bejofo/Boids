@@ -1,14 +1,7 @@
 import cmath
 import math
-import pygame, sys
-from pygame.locals import *
-import time 
 import random
-
-pygame.init()
-global DISPLAYSURF
-DISPLAYSURF = pygame.display.set_mode((500, 400), 0, 32)
-pygame.display.set_caption('Drawing')
+import pygame
 
 def normalize(vec):
     if abs(vec) == 0:
@@ -16,11 +9,12 @@ def normalize(vec):
     return vec/abs(vec)
 
 class BoidAgent():
-    def __init__(self,pos=complex(0,0),vel=complex(0,0)):
+    def __init__(self,pos=complex(0,0),vel=complex(0,0),surf=None):
         self.pos = pos
         self.vel = vel
         self.neighbors = []
         self.weights = (25,0.4,1.3)
+        self.surf = surf
         # seperation, aligment ,coehsinon
 
     def sense(self,n):
@@ -75,62 +69,5 @@ class BoidAgent():
             x,y = cart.real,cart.imag
             points.append((self.pos.real+x,self.pos.imag+y))
             theta+= (2*math.pi)/3
-        pygame.draw.polygon(DISPLAYSURF,(255,255,255),points)
-        pygame.draw.circle(DISPLAYSURF,(255,0,0),points[0],4)
-
-
-
-boids = []
-
-# for _ in range(30):
-#     boids.append(
-#         BoidAgent(
-#             complex(random.randint(0,200),random.randint(0,200)),
-#             complex(random.randint(-6,6),random.randint(-6,6))
-#             )
-    # )
-boids.append(
-    BoidAgent(complex(60,60),complex(0,4))
-)
-boids.append(
-    BoidAgent(complex(120,60),complex(1,-2))
-)
-boids.append(
-    BoidAgent(complex(60,120),complex(1,-2))
-)
-boids.append(
-    BoidAgent(complex(200,200),4*complex(-1,-2))
-)
-
-
-while True:
-    keys=pygame.key.get_pressed()
-    if keys[K_LEFT] or keys[K_a]:
-        for b in boids:
-            b.pos+= complex(2,0)
-    if keys[K_RIGHT] or keys[K_d]:
-         for b in boids:
-            b.pos+= complex(-2,0)
-    if keys[K_UP] or keys[K_w]:
-         for b in boids:
-            b.pos+= complex(0,2)
-    if keys[K_DOWN] or keys[K_s]:
-        for b in boids:
-            b.pos+= complex(0,-2)
-    
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            pos = pygame.mouse.get_pos()
-            boids.append(BoidAgent(complex(*pos)))
-
-    DISPLAYSURF.fill((0,0,0))
-    time.sleep(0.005)
-    for x in boids:
-        x.sense(boids)
-        x.decide()
-        x.act(0.01)
-        x.render()
-    pygame.display.update()
+        pygame.draw.polygon(self.surf,(255,255,255),points)
+        pygame.draw.circle(self.surf,(255,0,0),points[0],4)
