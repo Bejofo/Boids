@@ -9,19 +9,25 @@ def normalize(vec):
     return vec/abs(vec)
 
 class BoidAgent():
-    def __init__(self,pos=complex(0,0),vel=complex(0,0),surf=None):
+    BOID_SIZE = 7
+    def __init__(self,pos=complex(0,0),vel=complex(1,0),surf=None):
         self.pos = pos
         self.vel = vel
         self.neighbors = []
-        self.weights = (25,0.4,1.3)
+        self.obstacles = [] 
+        self.weights = (0.7,0.5,1.4)
         self.surf = surf
         # seperation, aligment ,coehsinon
 
-    def sense(self,n):
+    def sense(self,n,o):
         self.neighbors = []
+        self.obstacles =[]
         for x in n:
-            if x != self and abs(x.pos-self.pos) < 100:
+            if x != self and abs(x.pos-self.pos) < 90:
                 self.neighbors.append(x)
+        for x in o:
+            if x != self and abs(x.pos-self.pos) < 90:
+                self.obstacles.append(x)
     
     def decide(self):
         self.separation()
@@ -40,11 +46,11 @@ class BoidAgent():
 
     def separation(self):
         tempVec = complex(0,0)
-        if len(self.neighbors) == 0:
+        if len(self.neighbors+self.obstacles) == 0:
             return
-        for n in self.neighbors:
+        for n in self.neighbors + self.obstacles:
             dist = abs(n.pos-self.pos)
-            distanceScaling = 1/dist
+            distanceScaling = 1 if dist > 30 else 4 if dist < 15 else 2
             self.goto(n.pos,-self.weights[0]*distanceScaling)
     
     def alignment(self):
@@ -65,7 +71,7 @@ class BoidAgent():
         points = []
         theta = 0
         for _ in range(3):
-            cart = cmath.rect(7,angle+theta)
+            cart = cmath.rect(self.BOID_SIZE,angle+theta)
             x,y = cart.real,cart.imag
             points.append((self.pos.real+x,self.pos.imag+y))
             theta+= (2*math.pi)/3
