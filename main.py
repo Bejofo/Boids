@@ -24,7 +24,6 @@ if __name__ == "__main__":
     #     obstacles.append(Obstacle(complex(x,0),DISPLAYSURF))
     #     obstacles.append(Obstacle(complex(x,400),DISPLAYSURF))
 
-
     def move_everything(vec):
         for b in boids:
             b.pos+= vec

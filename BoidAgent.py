@@ -10,23 +10,24 @@ def normalize(vec):
 
 class BoidAgent():
     BOID_SIZE = 7
+    SENSE_RADIUS = 90
+    WEIGHTS = (0.7,0.5,1.4)
+    # seperation, aligment ,coehsinon
     def __init__(self,pos=complex(0,0),vel=complex(1,0),surf=None):
         self.pos = pos
         self.vel = vel
         self.neighbors = []
         self.obstacles = [] 
-        self.weights = (0.7,0.5,1.4)
         self.surf = surf
-        # seperation, aligment ,coehsinon
-
+    
     def sense(self,n,o):
         self.neighbors = []
         self.obstacles =[]
         for x in n:
-            if x != self and abs(x.pos-self.pos) < 90:
+            if x != self and abs(x.pos-self.pos) < self.SENSE_RADIUS:
                 self.neighbors.append(x)
         for x in o:
-            if x != self and abs(x.pos-self.pos) < 90:
+            if x != self and abs(x.pos-self.pos) < self.SENSE_RADIUS:
                 self.obstacles.append(x)
     
     def decide(self):
@@ -51,20 +52,20 @@ class BoidAgent():
         for n in self.neighbors + self.obstacles:
             dist = abs(n.pos-self.pos)
             distanceScaling = 1 if dist > 30 else 4 if dist < 15 else 2
-            self.goto(n.pos,-self.weights[0]*distanceScaling)
+            self.goto(n.pos,-self.WEIGHTS[0]*distanceScaling)
     
     def alignment(self):
         if len(self.neighbors) == 0:
             return
         tempVec = sum([n.vel for n in self.neighbors])
         tempVec = normalize(tempVec)
-        self.vel += self.weights[1]*tempVec/ len(self.neighbors)
+        self.vel += self.WEIGHTS[1]*tempVec/ len(self.neighbors)
 
     def cohesion(self):
         if len(self.neighbors) == 0:
             return
         meanPos = sum([n.pos for n in self.neighbors]) / len(self.neighbors)
-        self.goto(meanPos,self.weights[2])
+        self.goto(meanPos,self.WEIGHTS[2])
 
     def render(self):
         angle = cmath.phase(self.vel)
