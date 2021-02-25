@@ -11,11 +11,14 @@ def normalize(vec):
 class BoidAgent():
     BOID_SIZE = 7
     SENSE_RADIUS = 90
-    WEIGHTS = (0.7,0.5,1.4)
-    # seperation, aligment ,coehsinon
-    def __init__(self,pos=complex(0,0),vel=complex(1,0),surf=None):
+    WEIGHTS = (1.1,1,1.1,0.1)
+    INERTIA =0.6
+    DRAW_CIRCLE = True
+    # seperation, aligment ,coehsinon,randomness
+    def __init__(self,pos=complex(0,0),vel=complex(10,0),surf=None):
         self.pos = pos
         self.vel = vel
+        self.accel = complex(0,0)
         self.neighbors = []
         self.obstacles = [] 
         self.surf = surf
@@ -31,41 +34,37 @@ class BoidAgent():
                 self.obstacles.append(x)
     
     def decide(self):
-        self.separation()
-        self.alignment()
-        self.cohesion()
+        self.accel += self.separation() * self.WEIGHTS[0]
+        self.accel += self.alignment() * self.WEIGHTS[1]
+        self.accel += self.cohesion() * self.WEIGHTS[2]
+        self.accel += cmath.rect(self.WEIGHTS[3], random.uniform(0, math.pi*2))
 
     def act(self,dt):
-        if abs(self.vel) == 0:
-            return 
-        self.pos+=normalize(self.vel)*dt*20
-
-    def goto(self,target,strength):
-        deltaPos = target-self.pos
-        deltaPos = normalize(deltaPos)
-        self.vel+= deltaPos*strength 
+        self.vel+= self.accel*self.INERTIA
+        if abs(self.vel) > 20:
+            self.vel = normalize(self.vel)*20
+        self.pos+=self.vel*dt
+        self.accel = complex(0,0)
 
     def separation(self):
-        tempVec = complex(0,0)
         if len(self.neighbors+self.obstacles) == 0:
-            return
-        for n in self.neighbors + self.obstacles:
-            dist = abs(n.pos-self.pos)
-            distanceScaling = 1 if dist > 30 else 4 if dist < 15 else 2
-            self.goto(n.pos,-self.WEIGHTS[0]*distanceScaling)
-    
+            return complex(0,0)
+        tempVec = complex(0,0)
+        tempVec = sum([normalize(self.pos-n.pos)/abs(self.pos-n.pos)  for n in self.neighbors+self.obstacles])
+        return normalize(tempVec)
+
     def alignment(self):
         if len(self.neighbors) == 0:
-            return
+            return complex(0,0)
         tempVec = sum([n.vel for n in self.neighbors])
         tempVec = normalize(tempVec)
-        self.vel += self.WEIGHTS[1]*tempVec/ len(self.neighbors)
+        return tempVec/ len(self.neighbors)
 
     def cohesion(self):
         if len(self.neighbors) == 0:
-            return
+            return complex(0,0)
         meanPos = sum([n.pos for n in self.neighbors]) / len(self.neighbors)
-        self.goto(meanPos,self.WEIGHTS[2])
+        return normalize(meanPos-self.pos)
 
     def render(self):
         angle = cmath.phase(self.vel)
@@ -78,3 +77,5 @@ class BoidAgent():
             theta+= (2*math.pi)/3
         pygame.draw.polygon(self.surf,(255,255,255),points)
         pygame.draw.circle(self.surf,(255,0,0),points[0],4)
+        if self.DRAW_CIRCLE:
+            pygame.draw.circle(self.surf,(0,255,0),points[0],self.SENSE_RADIUS,width=1)

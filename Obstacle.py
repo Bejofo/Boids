@@ -1,7 +1,7 @@
 import pygame
 import cmath 
 class Obstacle():
-    RADIUS = 5
+    RADIUS = 20
     def __init__(self,pos=complex(0,0),surf=None):
         self.pos = pos
         self.surf = surf

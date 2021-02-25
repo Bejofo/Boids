@@ -8,6 +8,11 @@ from Obstacle import Obstacle
 if __name__ == "__main__":
     pygame.init()
     global DISPLAYSURF
+    global WIDTH 
+    global HEIGHT
+    WIDTH = 500
+    HEIGHT = 400
+    DISPLAYSURF = pygame.display.set_mode((WIDTH, HEIGHT), 0, 32)
     DISPLAYSURF = pygame.display.set_mode((500, 400), 0, 32)
     pygame.display.set_caption('Drawing')
     boids = [
@@ -17,7 +22,9 @@ if __name__ == "__main__":
         BoidAgent(complex(200,200),4*complex(-1,-2),DISPLAYSURF)
     ]
 
-    obstacles = []
+    obstacles = [
+        Obstacle(complex(350,300),DISPLAYSURF)
+    ]
     # for x in range(0,400,10):
     #     obstacles.append(Obstacle(complex(0,x),DISPLAYSURF))
     #     obstacles.append(Obstacle(complex(400,x),DISPLAYSURF))
@@ -48,6 +55,9 @@ if __name__ == "__main__":
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 boids.append(BoidAgent(complex(*pos),surf=DISPLAYSURF))
+            if event.type == pygame.KEYDOWN:
+                if event.key == K_x: # x key
+                    BoidAgent.DRAW_CIRCLE = not BoidAgent.DRAW_CIRCLE
         DISPLAYSURF.fill((0,0,0))
         time.sleep(0.005)
         for x in boids:
